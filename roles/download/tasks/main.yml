@@ -1,0 +1,15 @@
+---
+#
+#  - name: check welke oracle home
+#  - name: loop voor elke oracle home
+#    - name: check bestaan software directory
+#    - name: check of software directory genoeg ruimte heeft
+#    - name: loop over patches
+#      - name: copieer patches naar software directory
+
+  - name: Loop over list of patchable Oracle Homes
+    include_tasks: place_software.yml
+    debug:
+      msg: "Key={{ item.key }} value={{ item.value }} home={{ item.value.oracle_home }}"
+    loop: "{{ patch_oracle_homes | dict2items }}"
+

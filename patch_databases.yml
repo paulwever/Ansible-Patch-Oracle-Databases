@@ -1,0 +1,18 @@
+---
+# Example file for DB Patching
+
+ - hosts: example_group
+   any_errors_fatal: true
+   gather_facts: yes
+
+   vars_files:
+    - group_vars/patch_database_vars.yml
+
+   roles:
+    - unzip_patch
+#    - patch
+    - remove_patch
+# Above role list can be extended: a step to stop all databases/listeners
+# mount software, set blackout before and stop blackout after... be creative
+# and make your own role for that
+# 

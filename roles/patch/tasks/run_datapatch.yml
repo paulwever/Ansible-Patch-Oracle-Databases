@@ -1,0 +1,37 @@
+---
+# Start each database, run datapatch and shut it down again.
+
+ - name: "Start DB instance {{ sid }}"
+   become: true
+   become_user: "{{ oracle_user }}"
+   become_method: sudo
+   command: sh -c "export ORAENV_ASK=NO; export ORACLE_SID={{ sid }}; export PATH=$PATH:/usr/local/bin ; . {{ item.value.oracle_home }}/bin/oraenv -s; echo  'startup' | sqlplus / as SYSDBA"
+   register: startup_db
+
+ - name: "output startup db"
+   debug:
+     msg: "{{ startup_db.stdout }}"
+
+ - name: "Run datapatch on instance {{ sid }}"
+   become: true
+   become_user: "{{ oracle_user }}"
+   become_method: sudo
+   command: sh -c "export ORAENV_ASK=NO; export ORACLE_SID={{ sid }}; export PATH=$PATH:/usr/local/bin ; . {{ item.value.oracle_home }}/bin/oraenv -s; $ORACLE_HOME/OPatch/datapatch -verbose"
+   register: datapatch
+
+ - name: "output DATAPATCH"
+   debug:
+     msg: "{{ datapatch.stdout }}"
+
+ - name: "Shutdown database again"
+   become: true
+   become_user: "{{ oracle_user }}"
+   become_method: sudo
+   command: sh -c "export ORAENV_ASK=NO; export ORACLE_SID={{ sid }}; export PATH=$PATH:/usr/local/bin ; . {{ item.value.oracle_home }}/bin/oraenv -s;echo 'shutdown immediate' | sqlplus / as sysdba"
+   register: shutdown_db
+   when: item.value.shutdown_after_datapatch is defined
+
+ - name: "Output shutdown db"
+   debug:
+     msg: "{{ shutdown_db.stdout }}"
+   when: item.value.shutdown_after_datapatch is defined

@@ -1,0 +1,14 @@
+---
+# Remove the patches in the list from the hosts
+# Remove it in <stage_dir> 
+
+# The patch_oracle_homes hash contains all the patch numbers, most of
+# the time the patch is named p<patchnumber>_<RELEASEVERSION>_Platform.zip
+# so globbing the patch zip file may work... (maybe we should make a fallback hash to 
+# provide te right name)
+
+ - name: Loop over patch list 
+   include_tasks: loop_homes.yml
+#   debug:
+#     msg: "Key={{ item.key }} value={{ item.value }} home={{ item.value.oracle_home }}"
+   loop: "{{ patch_oracle_homes | dict2items }}"

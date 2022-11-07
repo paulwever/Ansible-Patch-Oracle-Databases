@@ -1,0 +1,35 @@
+---
+# For each existing Oracle Home copy the patch software to the directory
+
+  #
+  - name: "check for existance of Oracle Home: {{ item.value.oracle_home }}"
+    stat:
+      path: "{{ item.value.oracle_home }}"
+    register: home_dir
+
+  - name: "does Oracle Home exist?"
+    debug:
+      msg: "Exists home_dir {{ item.value.oracle_home }}: {{ home_dir }}"
+
+
+  # When an Oracle Home exists, execute the following block
+  - name: "Block for patch unzip action"
+    block:
+
+
+    - name: "run unzip_patch for patches in {{ item.key }}"
+      include_tasks: unzip_patch.yml
+      loop: "{{ item.value.install_patches }}"
+      loop_control:
+        loop_var: patch_number
+
+    - name: "run unzip_patch for one-off patches in {{ item.key }}"
+      include_tasks: unzip_patch.yml
+      loop: "{{ item.value.install_oneoffs }}"
+      loop_control:
+        loop_var: patch_number
+      when: item.value.install_oneoffs is defined
+
+
+    when: home_dir.stat.exists
+

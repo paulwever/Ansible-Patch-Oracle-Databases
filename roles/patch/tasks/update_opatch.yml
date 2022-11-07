@@ -1,0 +1,37 @@
+---
+# Update if required for OPatch in home
+    - name: "Check opatch for OracleHome {{ item.key }}"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      command: sh -c "{{ item.value['oracle_home'] }}/OPatch/opatch version | grep {{ opatch_version }} | wc -l"
+      register: opatch_version_installed
+      changed_when: False
+
+    - name: "Update opatch if required in home {{ item.key }} (step 1)"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      command: sh -c "mv {{ item.value['oracle_home'] }}/OPatch {{ item.value['oracle_home'] }}/Opatch.old"
+      when: opatch_version_installed.stdout == "0"   
+
+    - name: "Update opatch if required in home {{ item.key }} (step 2)"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      unarchive:
+        src:  "{{ patch_source_dir }}/{{ opatch_src_file }}"
+        dest: "{{ item.value['oracle_home']}}"
+      when: opatch_version_installed.stdout == "0"
+
+    - name: "Get opatch version for home {{ item.key }}"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      command: sh -c "{{ item.value['oracle_home'] }}/OPatch/opatch version | grep {{ opatch_version }}"
+      register: opatch_version_installed
+      changed_when: False
+    
+    - name: "Show OPatch version for home {{ item.key }}"
+      debug:
+        msg: "{{ opatch_version_installed.stdout }}"

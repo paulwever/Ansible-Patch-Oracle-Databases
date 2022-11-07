@@ -1,0 +1,19 @@
+---
+# Remove a patch.
+
+ - name: "Remove patch {{ patchid }}"
+   debug:
+     msg: "Remove patch {{ patchid }} from oracle_home {{ item.value.oracle_home }}"
+
+ - name: "Remove patch using opatch rollback"
+   become: true
+   become_user: "{{ oracle_user }}"
+   become_method: sudo
+   command: sh -c "{{ item.value.oracle_home }}/OPatch/opatch rollback -silent -oh {{ item.value.oracle_home }} -id {{ patchid }}"
+   register: opatch_output
+   when: patchid in installed_patchlist.stdout
+
+ - name: "OPatch output"
+   debug:
+     msg: "{{ opatch_output.stdout }}"
+   when: patchid in installed_patchlist.stdout

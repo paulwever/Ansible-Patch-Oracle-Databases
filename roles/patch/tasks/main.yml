@@ -1,0 +1,8 @@
+---
+
+# Main entry point for patching: below wil loop over the hash "patch_oracle_homes"
+# containing all the defined oracle homes and 
+
+ - name: Loop over Oracle Homes
+   include_tasks: do_home.yml
+   loop: "{{ patch_oracle_homes | dict2items }}"

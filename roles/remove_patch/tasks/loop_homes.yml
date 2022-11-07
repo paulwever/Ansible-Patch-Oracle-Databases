@@ -1,0 +1,29 @@
+---
+# For each existing home, unzip the patch using unzip_patch.yml
+
+  # 
+  - name: "check for existance of Oracle Home: {{ item.value.oracle_home }}"
+    stat:
+      path: "{{ item.value.oracle_home }}"
+    register: home_dir
+
+  # When an Oracle Home exists, execute the following block
+  - name: "Block for patch software removal action"
+    block:
+
+
+    - name: "run remove_patch_software for patches in {{ item.key }}"
+      include_tasks: remove_patch_software.yml
+      loop: "{{ item.value.install_patches }}" 
+      loop_control:
+        loop_var: patch
+    
+    - name: "run remove_patch_software for one-off patches in {{ item.key }}"
+      include_tasks: remove_patch_software.yml
+      loop: "{{ item.value.install_oneoffs }}" 
+      loop_control:
+        loop_var: patch_number
+      when: item.value.install_oneoffs is defined
+
+
+    when: home_dir.stat.exists

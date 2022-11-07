@@ -1,0 +1,4 @@
+[example_group]
+#localhost ansible_connection=local
+10.252.252.176
+10.252.252.177

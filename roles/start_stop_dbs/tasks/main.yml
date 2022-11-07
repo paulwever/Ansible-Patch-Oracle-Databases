@@ -1,0 +1,4 @@
+---
+
+# Stop databases (possibly all of them, or only the ones in the home to be patched)
+# And start option if finished... 

@@ -1,0 +1,66 @@
+---
+# Unzip patch software from ansible host to base directory on database server
+
+  - name: "Create stage dir: {{ stage_dir }}"
+    become: true
+    become_user: "{{ oracle_user }}"
+    become_method: sudo
+    file:
+      path: "{{ stage_dir }}"
+      owner: "{{ oracle_user }}"
+      group: "{{ oracle_group }}"
+      mode: 0755
+      state: directory
+
+  - name: "Set patch number"
+    set_fact:
+      patch_number: "{{ patch.split('_')[0] | regex_replace('^p(.*)$', '\\1') }}"
+
+  - name: "Get patch number"
+    debug:
+      msg: "Patch number: {{ patch_number }}"
+
+  - name: "Check directory existance for patch {{ patch_number }}"
+    become: true
+    become_user: "{{ oracle_user }}"
+    become_method: sudo
+    stat: 
+      path: "{{ stage_dir }}/p{{ patch_number }}/{{ patch_number }}"
+    register: patch_dir
+
+  - name: "Block for patch unzip action"
+    block:
+
+
+    - name: "Get patch number"
+      debug:
+        msg: "Patch number: {{ patch_number }}"
+
+    - name: "Create patch base directory"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      file:
+        path:  "{{ stage_dir }}/p{{ patch_number }}"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+        mode: 0755
+        state: directory
+      changed_when: False
+
+    - name: "Unzip patchfile in base dir"
+      become: true
+      become_user: "{{ oracle_user }}"
+      become_method: sudo
+      unarchive:
+        src:  "{{ patch_source_dir }}/{{ patch }}"
+        dest: "{{ stage_dir }}/p{{ patch_number }}"
+      changed_when: False
+
+
+    when: not patch_dir.stat.exists
+
+  - name: "Unset patch number"
+    set_fact:
+      patch_number:
+

@@ -1,0 +1,17 @@
+---
+# Remove the unzipped patch directory and contents
+
+  - name: "Set patch number"
+    set_fact:
+      patch_number: "{{ patch.split('_')[0] | regex_replace('^p(.*)$', '\\1') }}"
+
+  - name: "delete directory for patch {{ patch_number }}"
+    become: true
+    file:
+      path: "{{ stage_dir }}/p{{ patch_number }}"
+      state: absent
+    changed_when: False
+
+  - name: "Unset patch number"
+    set_fact:
+      patch_number:

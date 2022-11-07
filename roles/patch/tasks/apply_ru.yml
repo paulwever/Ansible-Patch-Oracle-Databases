@@ -1,0 +1,23 @@
+---
+# Apply a RU.
+# Expect the unpacked RU('s) in <stage_dir>/p<ru_number>/
+# the patchfile should be unzipped there.
+
+# Database and listener should be stopped before executing this step
+
+ - name: "patchlist in home"
+   debug:
+     msg: "{{ installed_patchlist.stdout }}"
+
+ - name: "execute OPatch"
+   become: true
+   become_user: "{{ oracle_user }}"
+   become_method: sudo
+   command: sh -c "{{ item.value.oracle_home }}/OPatch/opatch apply -silent -oh {{ item.value.oracle_home }} {{ stage_dir }}/p{{ patchid }}/{{ patchid }}"
+   register: opatch_output
+   when: patchid not in installed_patchlist.stdout
+
+ - name: "OPatch output"
+   debug:
+     msg: "{{ opatch_output.stdout }}"
+   when: patchid not in installed_patchlist.stdout

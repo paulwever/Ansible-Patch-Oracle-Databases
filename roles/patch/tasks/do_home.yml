@@ -1,0 +1,81 @@
+---
+ # Check opatch version(s)
+ # DB's should already be stopped
+ # apply patches for each home
+ # apply one-off patches for each home (if required)
+
+ - name: "List item data for item {{ item.key }}"
+   debug:
+     msg: "List: {{ item.value }}"
+
+
+# - name: "Show oracle_home for {{ item.key }}"
+#   debug:
+#     msg: "The home is: {{ item.value.oracle_home }}"
+#
+# - name: "check if Home exists"
+#   become: true
+#   become_user: "{{ oracle_user }}"
+#   become_method: sudo
+#   stat:
+#     path: "{{ item.value.oracle_home }}"
+#   register: home_path
+#
+# - name: "home exists"
+#   debug:
+#     msg: "Home does not exist: {{ item.value.oracle_home }}, skipping home"
+#   when: not home_path.stat.exists
+#
+# - name: "Do the home"
+#   block:
+#   # First update OPatch in the home
+#    - name: "Update OPatch"
+#      include_tasks: update_opatch.yml
+#
+#    - name: "Check current patches"
+#      become: true
+#      become_user: "{{ oracle_user }}"
+#      become_method: sudo
+#      command: sh -c "{{ item.value.oracle_home }}/OPatch/opatch lspatches -oh {{ item.value.oracle_home }} | grep '[[:digit:]]' | cut -d\; -f1"
+#      register: installed_patchlist
+#
+#    - name: "Gather list of DB instances for this home"
+#      become: true
+#      become_user: "{{ oracle_user }}"
+#      become_method: sudo
+#      command: sh -c "grep {{ item.value.oracle_home }} /etc/oratab | grep :Y | cut -d':' -f1"
+#      register: oratab_sid_list     
+#
+#   # Remove any patches that needs removal (one-offs mostly)
+#    - name: "Remove Patches before patching"
+#      include_tasks: remove_patch.yml
+#      loop: "{{ item.value.remove_patches }}"
+#      loop_control:
+#        loop_var: patchid
+#      when: item.value.remove_patches is defined
+#
+#   # apply RU's
+#    - name: "Apply RU for Home {{ item.key }}"
+#      include_tasks: apply_ru.yml
+#      loop: "{{ item.value.install_patches }}" 
+#      loop_control:
+#        loop_var: patchid
+#   
+#   # apply one-off patches
+#    - name: "Apply one-off patches for home {{ item.key }}"
+#      include_tasks: apply_oneoff.yml
+#      loop: "{{ item.value.install_oneoffs }}"
+#      loop_control:
+#        loop_var: patchid
+#      when: item.value.install_oneoffs is defined
+#
+#   # Run datapatch for each database in home.
+#    - name: "Run Datapatch for each database for home {{ item.key }}"
+#      include_tasks: run_datapatch.yml
+#      loop: "{{ oratab_sid_list.stdout_lines }}"
+#      loop_control:
+#        loop_var: sid
+#      when: item.value.datapatch == true
+#  
+#   # This when is part of the block
+#   when: home_path.stat.exists
